@@ -24,6 +24,7 @@ Ideal para empresas del sector alimenticio (panaderías, galleterías, etc.) que
 - ✅ **Gestión de permisos** por empresa
 - ✅ **API RESTful** completa
 - ✅ **Logging** con Morgan
+- ✅ **Scripts de datos de prueba** incluidos
 
 ## 🛠️ Tecnologías
 
@@ -33,16 +34,42 @@ Ideal para empresas del sector alimenticio (panaderías, galleterías, etc.) que
 - **Seguridad**: bcrypt, helmet, cors
 - **Contenedores**: Docker, Docker Compose
 - **Logging**: Morgan
+- **Linting**: ESLint
 
 ## 📦 Instalación
 
 ### Prerrequisitos
 
-- Node.js 18+ 
-- Docker Desktop
+- **Docker Desktop** (requerido)
 - Cuenta en Supabase
 
-### Opción 1: Desarrollo Local
+### Opción 1: Docker (Recomendado)
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/tu-usuario/sistema-costos-backend.git
+cd sistema-costos-backend
+
+# Configurar variables de entorno
+cp process.env.example .env
+# Editar .env con tus credenciales de Supabase
+
+# Ejecutar con Docker
+docker-compose up --build -d
+
+# Verificar que esté corriendo
+docker-compose ps
+
+# Ver logs en tiempo real
+docker-compose logs -f
+```
+
+### Opción 2: Desarrollo Local (Opcional)
+
+Si prefieres desarrollar sin Docker, necesitarás:
+
+- Node.js 18+ 
+- npm o yarn
 
 ```bash
 # Clonar el repositorio
@@ -58,20 +85,6 @@ cp process.env.example .env
 
 # Ejecutar en desarrollo
 npm run dev
-```
-
-### Opción 2: Docker (Recomendado)
-
-```bash
-# Clonar el repositorio
-git clone https://github.com/tu-usuario/sistema-costos-backend.git
-cd sistema-costos-backend
-
-# Ejecutar con Docker
-docker-compose up --build -d
-
-# Verificar que esté corriendo
-docker-compose ps
 ```
 
 ## ⚙️ Configuración
@@ -95,6 +108,13 @@ NODE_ENV=development
 # Google OAuth (opcional)
 GOOGLE_CLIENT_ID=tu_google_client_id
 GOOGLE_CLIENT_SECRET=tu_google_client_secret
+
+# Base de datos local (opcional)
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=costos_db
+DB_USER=postgres
+DB_PASSWORD=postgres123
 ```
 
 ### Configuración de Supabase
@@ -140,6 +160,7 @@ CREATE TABLE IF NOT EXISTS Usuario (
 | POST | `/auth/register` | Registro de usuario |
 | POST | `/auth/login` | Login de usuario |
 | GET | `/auth/google` | Login con Google |
+| GET | `/auth/google/callback` | Callback de Google OAuth |
 
 ### Empresas
 
@@ -149,7 +170,7 @@ CREATE TABLE IF NOT EXISTS Usuario (
 | GET | `/empresas/:id` | Obtener empresa |
 | GET | `/empresas` | Listar empresas del usuario |
 
-### Rutas Protegidas
+### Rutas de Prueba
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
@@ -210,22 +231,35 @@ docker-compose up --build -d
 - **backend**: Aplicación Node.js (puerto 3000)
 - **Base de datos**: Supabase (remota)
 
-## 🧪 Pruebas
+## 🧪 Pruebas y Datos de Test
 
-### Datos de Prueba
+### Scripts de Datos de Prueba
 
 ```bash
-# Insertar datos de prueba
-node insert-test-data.js
+# Insertar datos de prueba básicos
+npm run seed
 
-# O usar el script de seed
+# Insertar datos de prueba completos
+npm run insert-test
+
+# O ejecutar directamente
 node seedTest.js
+node insert-test-data.js
 ```
 
 ### Usuario de Prueba
 
 - **Email**: test@example.com
 - **Contraseña**: 123456
+
+### Archivos de Test
+
+El proyecto incluye múltiples archivos de test en `db/tests/` para insertar datos de prueba de:
+- Países y monedas
+- Empresas y rubros
+- Usuarios y licencias
+- Proveedores y materias primas
+- Productos y recetas
 
 ## 📁 Estructura del Proyecto
 
@@ -242,6 +276,9 @@ backend/
 ├── services/        # Servicios de negocio
 ├── Dockerfile       # Configuración Docker
 ├── docker-compose.yml
+├── docker-start.sh  # Script de inicio Docker
+├── test-connection.js # Test de conexión a BD
+├── supabaseClient.js # Cliente de Supabase
 └── server.js        # Punto de entrada
 ```
 
@@ -256,8 +293,20 @@ npm run dev
 # Producción
 npm start
 
-# Tests
-npm test
+# Linting
+npm run lint
+npm run lint:fix
+
+# Docker
+npm run docker:build
+npm run docker:run
+npm run docker:compose
+npm run docker:logs
+npm run docker:down
+
+# Datos de prueba
+npm run seed
+npm run insert-test
 ```
 
 ### Agregar Nuevas Rutas
@@ -312,13 +361,23 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ## 🗺️ Roadmap
 
-- [ ] Tests unitarios y de integración
-- [ ] Documentación con Swagger
-- [ ] Rate limiting
-- [ ] Cache con Redis
-- [ ] Notificaciones por email
-- [ ] Dashboard de métricas
-- [ ] API para móviles
+### Funcionalidades Pendientes
+
+- [ ] **Tests unitarios y de integración** - Implementar suite de pruebas automatizadas
+- [ ] **Documentación con Swagger** - Generar documentación interactiva de la API
+- [ ] **Rate limiting** - Implementar límites de velocidad para proteger la API
+- [ ] **Cache con Redis** - Optimizar rendimiento con sistema de caché
+- [ ] **Notificaciones por email** - Sistema de notificaciones automáticas
+- [ ] **Dashboard de métricas** - Panel de control con estadísticas del sistema
+- [ ] **API para móviles** - Endpoints optimizados para aplicaciones móviles
+
+### Mejoras Técnicas
+
+- [ ] **Validación de datos** - Middleware de validación robusto
+- [ ] **Logging avanzado** - Sistema de logs estructurados
+- [ ] **Monitoreo** - Integración con herramientas de monitoreo
+- [ ] **Backup automático** - Sistema de respaldo de datos
+- [ ] **CI/CD** - Pipeline de integración y despliegue continuo
 
 ---
 
