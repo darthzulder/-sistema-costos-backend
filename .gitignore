@@ -3,7 +3,6 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
 
 # Environment variables
 .env
@@ -11,15 +10,16 @@ package-lock.json
 .env.development.local
 .env.test.local
 .env.production.local
-process.env
+
+# Build outputs
+dist/
+build/
+.next/
+out/
 
 # Logs
 logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
 
 # Runtime data
 pids
@@ -34,26 +34,8 @@ coverage/
 # nyc test coverage
 .nyc_output
 
-# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
-.grunt
-
-# Bower dependency directory (https://bower.io/)
-bower_components
-
-# node-waf configuration
-.lock-wscript
-
-# Compiled binary addons (https://nodejs.org/api/addons.html)
-build/Release
-
 # Dependency directories
 jspm_packages/
-
-# TypeScript v1 declaration files
-typings/
-
-# TypeScript cache
-*.tsbuildinfo
 
 # Optional npm cache directory
 .npm
@@ -76,38 +58,36 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env.test
-
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
 
-# Next.js build output
+# next.js build output
 .next
 
-# Nuxt.js build / generate output
+# nuxt.js build output
 .nuxt
-dist
 
-# Gatsby files
-.cache/
-public
+# vuepress build output
+.vuepress/dist
 
-# Storybook build outputs
-.out
-.storybook-out
+# Serverless directories
+.serverless/
 
-# Temporary folders
-tmp/
-temp/
+# FuseBox cache
+.fusebox/
 
-# Editor directories and files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Docker
+.dockerignore
 
 # OS generated files
 .DS_Store
@@ -118,21 +98,25 @@ temp/
 ehthumbs.db
 Thumbs.db
 
-# Docker
-.dockerignore
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
 
 # Database
 *.sqlite
 *.db
 
-# Backup files
-*.bak
-*.backup
+# SSL certificates
+*.pem
+*.key
+*.crt
 
-# Test files
-test-results/
-coverage/
-
-# Build artifacts
-build/
-dist/ 
+# Docker volumes
+postgres_data/ 

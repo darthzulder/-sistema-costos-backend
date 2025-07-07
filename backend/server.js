@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const passport = require('passport');
 const session = require('express-session');
-require('./config/passport');
+require('./passport');
 const authRoutes = require('./routes/auth');
 const googleAuth = require('./routes/googleAuth');
 const testProtectedRoutes = require('./routes/testProtected');

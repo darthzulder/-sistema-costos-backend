@@ -1,345 +1,196 @@
-# 🏢 Sistema de Gestión de Costos - Backend
+# Sistema de Gestión de Costos Empresariales
 
-Sistema backend para la gestión integral de costos empresariales, desarrollado en Node.js con Express y Supabase como base de datos en la nube.
+Sistema completo para la gestión de costos empresariales con backend en Node.js/Express y frontend en React.
 
-## 📋 Descripción
+## 🏗️ Arquitectura
 
-Este proyecto proporciona una API REST completa para gestionar:
-- **Usuarios y autenticación** (manual y Google OAuth)
-- **Empresas y sus configuraciones**
-- **Productos y recetas**
-- **Materias primas y proveedores**
-- **Rubros de negocio**
-- **Licencias de usuarios**
+```
+├── backend/          # API REST con Node.js, Express y Supabase
+├── frontend/         # Aplicación React con Vite y Tailwind CSS
+├── docker/           # Configuración Docker y scripts
+└── .github/          # Workflows de CI/CD
+```
 
-Ideal para empresas del sector alimenticio (panaderías, galleterías, etc.) que necesitan controlar costos de producción.
-
-## 🚀 Características
-
-- ✅ **Autenticación JWT** con registro y login
-- ✅ **Integración con Google OAuth**
-- ✅ **Base de datos en la nube** (Supabase)
-- ✅ **Docker** para desarrollo y despliegue
-- ✅ **Middleware de seguridad** (Helmet, CORS)
-- ✅ **Gestión de permisos** por empresa
-- ✅ **API RESTful** completa
-- ✅ **Logging** con Morgan
-- ✅ **Scripts de datos de prueba** incluidos
-
-## 🛠️ Tecnologías
-
-- **Backend**: Node.js, Express.js
-- **Base de Datos**: PostgreSQL (Supabase)
-- **Autenticación**: JWT, Passport.js, Google OAuth
-- **Seguridad**: bcrypt, helmet, cors
-- **Contenedores**: Docker, Docker Compose
-- **Logging**: Morgan
-- **Linting**: ESLint
-
-## 📦 Instalación
+## 🚀 Inicio Rápido con Docker
 
 ### Prerrequisitos
 
-- **Docker Desktop** (requerido)
-- Cuenta en Supabase
+- Docker Desktop instalado
+- Docker Compose instalado
 
-### Opción 1: Docker (Recomendado)
+### Instalación y Ejecución
+
+1. **Clonar el repositorio:**
+   ```bash
+   git clone <url-del-repositorio>
+   cd sistema-costos-backend
+   ```
+
+2. **Iniciar todo el sistema:**
+   ```bash
+   # En Windows/Linux/macOS
+   chmod +x docker/start.sh
+   ./docker/start.sh
+   
+   # O directamente con Docker Compose
+   docker-compose up -d
+   ```
+
+3. **Acceder a la aplicación:**
+   - Frontend: http://localhost
+   - Backend API: http://localhost/api
+   - Base de datos: localhost:5432
+
+### Comandos Docker Útiles
 
 ```bash
-# Clonar el repositorio
-git clone https://github.com/tu-usuario/sistema-costos-backend.git
-cd sistema-costos-backend
+# Iniciar servicios
+docker-compose up -d
 
-# Configurar variables de entorno
-cp process.env.example .env
-# Editar .env con tus credenciales de Supabase
+# Ver logs
+docker-compose logs -f
 
-# Ejecutar con Docker
-docker-compose up --build -d
+# Detener servicios
+docker-compose down
 
-# Verificar que esté corriendo
+# Reconstruir imágenes
+docker-compose build --no-cache
+
+# Ver estado de servicios
 docker-compose ps
 
-# Ver logs en tiempo real
-docker-compose logs -f
+# Ejecutar comandos en contenedores
+docker-compose exec backend npm run seed
+docker-compose exec frontend npm run build
 ```
 
-### Opción 2: Desarrollo Local (Opcional)
+## 🛠️ Desarrollo
 
-Si prefieres desarrollar sin Docker, necesitarás:
+### Estructura del Proyecto
 
-- Node.js 18+ 
-- npm o yarn
+#### Backend (`/backend`)
+- **Framework:** Node.js con Express
+- **Base de datos:** Supabase (PostgreSQL)
+- **Autenticación:** JWT + Passport
+- **Puerto:** 3000
 
-```bash
-# Clonar el repositorio
-git clone https://github.com/tu-usuario/sistema-costos-backend.git
-cd sistema-costos-backend
+#### Frontend (`/frontend`)
+- **Framework:** React 18
+- **Build tool:** Vite
+- **Styling:** Tailwind CSS
+- **Estado:** React Query
+- **Puerto:** 3001
 
-# Instalar dependencias
-npm install
-
-# Configurar variables de entorno
-cp process.env.example .env
-# Editar .env con tus credenciales de Supabase
-
-# Ejecutar en desarrollo
-npm run dev
-```
-
-## ⚙️ Configuración
+#### Docker
+- **Backend:** Node.js 18 Alpine
+- **Frontend:** Node.js 18 Alpine
+- **Base de datos:** PostgreSQL 15
+- **Proxy:** Nginx
 
 ### Variables de Entorno
 
-Crea un archivo `.env` con las siguientes variables:
-
+#### Backend
 ```env
-# Supabase
-SUPABASE_URL=tu_url_de_supabase
-SUPABASE_ANON_KEY=tu_clave_anonima_de_supabase
-
-# JWT
-JWT_SECRET=tu_clave_secreta_super_segura
-
-# Servidor
-PORT=3000
 NODE_ENV=development
-
-# Google OAuth (opcional)
-GOOGLE_CLIENT_ID=tu_google_client_id
-GOOGLE_CLIENT_SECRET=tu_google_client_secret
-
-# Base de datos local (opcional)
-DB_HOST=localhost
+PORT=3000
+JWT_SECRET=tu_clave_secreta_super_segura_para_jwt
+SUPABASE_URL=https://tu-proyecto.supabase.co
+SUPABASE_ANON_KEY=tu_clave_anonima_de_supabase
+DB_HOST=postgres
 DB_PORT=5432
 DB_NAME=costos_db
 DB_USER=postgres
 DB_PASSWORD=postgres123
 ```
 
-### Configuración de Supabase
-
-1. Crea un proyecto en [Supabase](https://supabase.com)
-2. Ejecuta el script SQL para crear las tablas:
-
-```sql
--- Crear tabla Pais
-CREATE TABLE IF NOT EXISTS Pais (
-    IDPais SERIAL PRIMARY KEY,
-    Nom_Pais VARCHAR(100) NOT NULL,
-    Codigo_Cel VARCHAR(10)
-);
-
--- Crear tabla Moneda
-CREATE TABLE IF NOT EXISTS Moneda (
-    IDMoneda SERIAL PRIMARY KEY,
-    Nom_Moneda VARCHAR(50) NOT NULL,
-    Simbolo VARCHAR(10)
-);
-
--- Crear tabla Usuario
-CREATE TABLE IF NOT EXISTS Usuario (
-    IDUsuario SERIAL PRIMARY KEY,
-    Correo VARCHAR(100) UNIQUE NOT NULL,
-    Nombre VARCHAR(100) NOT NULL,
-    Clave VARCHAR(255),
-    Celular VARCHAR(20),
-    IDPais INTEGER REFERENCES Pais(IDPais),
-    Tipo_Usuario VARCHAR(20) DEFAULT 'manual'
-);
-
--- ... (resto de tablas en db/init/01-init.sql)
+#### Frontend
+```env
+VITE_API_URL=http://localhost:3000
 ```
 
-## 📚 API Endpoints
+## 📋 Funcionalidades
 
-### Autenticación
+### Backend
+- ✅ Autenticación JWT
+- ✅ Gestión de empresas
+- ✅ Gestión de productos
+- ✅ Cálculo de costos
+- ✅ API REST completa
+- ✅ Integración con Supabase
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/auth/register` | Registro de usuario |
-| POST | `/auth/login` | Login de usuario |
-| GET | `/auth/google` | Login con Google |
-| GET | `/auth/google/callback` | Callback de Google OAuth |
+### Frontend
+- ✅ Interfaz moderna con React
+- ✅ Diseño responsive con Tailwind
+- ✅ Navegación con React Router
+- ✅ Gestión de estado con React Query
+- ✅ Formularios con React Hook Form
 
-### Empresas
+## 🔧 Scripts Disponibles
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/empresas` | Crear empresa |
-| GET | `/empresas/:id` | Obtener empresa |
-| GET | `/empresas` | Listar empresas del usuario |
-
-### Rutas de Prueba
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/test/protegido` | Ruta de prueba protegida |
-
-## 🔐 Autenticación
-
-### Registro de Usuario
-
+### Docker
 ```bash
-curl -X POST http://localhost:3000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "correo": "usuario@ejemplo.com",
-    "nombre": "Usuario Ejemplo",
-    "clave": "contraseña123"
-  }'
+./docker/start.sh    # Iniciar todo el sistema
+./docker/stop.sh     # Detener todo el sistema
+./docker/logs.sh     # Ver logs
 ```
 
-### Login
-
+### Backend
 ```bash
-curl -X POST http://localhost:3000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "correo": "usuario@ejemplo.com",
-    "clave": "contraseña123"
-  }'
+npm run dev          # Desarrollo con nodemon
+npm start            # Producción
+npm run lint         # Linting
+npm run seed         # Poblar base de datos
 ```
 
-### Uso del Token
-
+### Frontend
 ```bash
-curl -X GET http://localhost:3000/empresas \
-  -H "Authorization: Bearer TU_TOKEN_JWT"
+npm run dev          # Desarrollo con Vite
+npm run build        # Build de producción
+npm run preview      # Preview del build
+npm run lint         # Linting
 ```
-
-## 🐳 Docker
-
-### Comandos Útiles
-
-```bash
-# Construir y ejecutar
-docker-compose up --build -d
-
-# Ver logs
-docker-compose logs -f
-
-# Detener
-docker-compose down
-
-# Reconstruir
-docker-compose up --build -d
-```
-
-### Estructura de Contenedores
-
-- **backend**: Aplicación Node.js (puerto 3000)
-- **Base de datos**: Supabase (remota)
-
-## 🧪 Pruebas y Datos de Test
-
-### Scripts de Datos de Prueba
-
-```bash
-# Insertar datos de prueba básicos
-npm run seed
-
-# Insertar datos de prueba completos
-npm run insert-test
-
-# O ejecutar directamente
-node seedTest.js
-node insert-test-data.js
-```
-
-### Usuario de Prueba
-
-- **Email**: test@example.com
-- **Contraseña**: 123456
-
-### Archivos de Test
-
-El proyecto incluye múltiples archivos de test en `db/tests/` para insertar datos de prueba de:
-- Países y monedas
-- Empresas y rubros
-- Usuarios y licencias
-- Proveedores y materias primas
-- Productos y recetas
-
-## 📁 Estructura del Proyecto
-
-```
-backend/
-├── config/           # Configuraciones (Passport, etc.)
-├── controllers/      # Controladores de la API
-├── db/              # Base de datos y scripts
-│   ├── inserts/     # Funciones de inserción
-│   ├── scripts/     # Scripts de datos
-│   └── tests/       # Tests de inserción
-├── middlewares/     # Middlewares personalizados
-├── routes/          # Rutas de la API
-├── services/        # Servicios de negocio
-├── Dockerfile       # Configuración Docker
-├── docker-compose.yml
-├── docker-start.sh  # Script de inicio Docker
-├── test-connection.js # Test de conexión a BD
-├── supabaseClient.js # Cliente de Supabase
-└── server.js        # Punto de entrada
-```
-
-## 🔧 Desarrollo
-
-### Scripts Disponibles
-
-```bash
-# Desarrollo
-npm run dev
-
-# Producción
-npm start
-
-# Linting
-npm run lint
-npm run lint:fix
-
-# Docker
-npm run docker:build
-npm run docker:run
-npm run docker:compose
-npm run docker:logs
-npm run docker:down
-
-# Datos de prueba
-npm run seed
-npm run insert-test
-```
-
-### Agregar Nuevas Rutas
-
-1. Crear controlador en `controllers/`
-2. Crear ruta en `routes/`
-3. Registrar en `server.js`
 
 ## 🚀 Despliegue
 
-### Producción con Docker
-
+### Desarrollo Local
 ```bash
-# Construir imagen de producción
-docker build -t sistema-costos-backend .
-
-# Ejecutar en producción
-docker run -p 3000:3000 \
-  -e NODE_ENV=production \
-  -e SUPABASE_URL=tu_url \
-  -e SUPABASE_ANON_KEY=tu_key \
-  sistema-costos-backend
+docker-compose up -d
 ```
 
-### Variables de Entorno de Producción
+### Producción
+```bash
+# Construir imágenes de producción
+docker-compose -f docker-compose.prod.yml build
 
-```env
-NODE_ENV=production
-PORT=3000
-JWT_SECRET=clave_super_segura_produccion
-SUPABASE_URL=tu_url_produccion
-SUPABASE_ANON_KEY=tu_key_produccion
+# Desplegar
+docker-compose -f docker-compose.prod.yml up -d
 ```
+
+## 📊 Monitoreo
+
+### Health Checks
+- Backend: http://localhost/api/health
+- Frontend: http://localhost
+- Base de datos: Verificar logs de PostgreSQL
+
+### Logs
+```bash
+# Todos los servicios
+docker-compose logs -f
+
+# Servicio específico
+docker-compose logs -f backend
+docker-compose logs -f frontend
+docker-compose logs -f postgres
+```
+
+## 🔒 Seguridad
+
+- Usuarios no-root en contenedores
+- Variables de entorno para secretos
+- Proxy reverso con Nginx
+- CORS configurado
+- Helmet para headers de seguridad
 
 ## 🤝 Contribución
 
@@ -349,36 +200,19 @@ SUPABASE_ANON_KEY=tu_key_produccion
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
 
-## 📝 Licencia
+## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
 
-## 📞 Soporte
+## 🆘 Soporte
 
-- **Email**: soporte@ejemplo.com
-- **Issues**: [GitHub Issues](https://github.com/tu-usuario/sistema-costos-backend/issues)
-- **Documentación**: [Wiki del proyecto](https://github.com/tu-usuario/sistema-costos-backend/wiki)
+Si tienes problemas o preguntas:
 
-## 🗺️ Roadmap
-
-### Funcionalidades Pendientes
-
-- [ ] **Tests unitarios y de integración** - Implementar suite de pruebas automatizadas
-- [ ] **Documentación con Swagger** - Generar documentación interactiva de la API
-- [ ] **Rate limiting** - Implementar límites de velocidad para proteger la API
-- [ ] **Cache con Redis** - Optimizar rendimiento con sistema de caché
-- [ ] **Notificaciones por email** - Sistema de notificaciones automáticas
-- [ ] **Dashboard de métricas** - Panel de control con estadísticas del sistema
-- [ ] **API para móviles** - Endpoints optimizados para aplicaciones móviles
-
-### Mejoras Técnicas
-
-- [ ] **Validación de datos** - Middleware de validación robusto
-- [ ] **Logging avanzado** - Sistema de logs estructurados
-- [ ] **Monitoreo** - Integración con herramientas de monitoreo
-- [ ] **Backup automático** - Sistema de respaldo de datos
-- [ ] **CI/CD** - Pipeline de integración y despliegue continuo
+1. Revisa los logs: `docker-compose logs -f`
+2. Verifica el estado de los servicios: `docker-compose ps`
+3. Reconstruye las imágenes: `docker-compose build --no-cache`
+4. Abre un issue en GitHub
 
 ---
 
-**Desarrollado con ❤️ para la gestión eficiente de costos empresariales** 
+**Desarrollado con ❤️ para optimizar la gestión de costos empresariales** 
