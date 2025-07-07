@@ -1,3 +1,4 @@
+const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
@@ -5,8 +6,20 @@ const insertarUsuario = require('../db/inserts/usuario');
 
 // ✅ Registro manual
 exports.registerManual = async (req, res) => {
+  // Validación de datos
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const { correo, nombre, clave } = req.body;
   try {
+    // Verificar si el usuario ya existe
+    const existe = await pool.query('SELECT 1 FROM Usuario WHERE Correo = $1', [correo]);
+    if (existe.rows.length > 0) {
+      return res.status(409).json({ error: 'El correo ya está registrado.' });
+    }
+
     const hash = await bcrypt.hash(clave, 10);
     const nuevoUsuario = await insertarUsuario({
       correo,

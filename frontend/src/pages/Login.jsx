@@ -1,20 +1,49 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Eye, EyeOff, LogIn } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   })
+  
   const navigate = useNavigate()
+  const location = useLocation()
+  const { login } = useAuth()
 
-  const handleSubmit = (e) => {
+  // Mostrar mensaje de registro exitoso
+  useEffect(() => {
+    if (location.state?.message) {
+      setMessage(location.state.message)
+      // Limpiar el estado para que no se muestre en futuras navegaciones
+      navigate(location.pathname, { replace: true })
+    }
+  }, [location, navigate])
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Aquí iría la lógica de autenticación
-    console.log('Login attempt:', formData)
-    navigate('/dashboard')
+    setError('')
+    setLoading(true)
+
+    try {
+      const result = await login(formData.email, formData.password)
+      
+      if (result.success) {
+        navigate('/dashboard')
+      } else {
+        setError(result.error)
+      }
+    } catch (error) {
+      setError('Error en el inicio de sesión. Inténtalo de nuevo.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleChange = (e) => {
@@ -35,6 +64,19 @@ const Login = () => {
             Accede a tu cuenta del Sistema de Costos
           </p>
         </div>
+
+        {message && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+            {message}
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+            {error}
+          </div>
+        )}
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -85,11 +127,30 @@ const Login = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <LogIn className="h-5 w-5 mr-2" />
-              Iniciar Sesión
+              {loading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                <>
+                  <LogIn className="h-5 w-5 mr-2" />
+                  Iniciar Sesión
+                </>
+              )}
             </button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              ¿No tienes una cuenta?{' '}
+              <Link
+                to="/register"
+                className="font-medium text-primary-600 hover:text-primary-500"
+              >
+                Registrarse
+              </Link>
+            </p>
           </div>
         </form>
       </div>

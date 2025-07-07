@@ -1,18 +1,29 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Home, Building2, Package, Calculator, LogIn, User } from 'lucide-react'
+import { Menu, X, Home, Building2, Package, Calculator, LogIn, User, LogOut } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
+  const { user, isAuthenticated, logout } = useAuth()
 
-  const navigation = [
+  const publicNavigation = [
     { name: 'Inicio', href: '/', icon: Home },
+  ]
+
+  const privateNavigation = [
     { name: 'Dashboard', href: '/dashboard', icon: Calculator },
     { name: 'Empresas', href: '/empresas', icon: Building2 },
     { name: 'Productos', href: '/productos', icon: Package },
     { name: 'Costos', href: '/costos', icon: Calculator },
   ]
+
+  const navigation = isAuthenticated() ? privateNavigation : publicNavigation
+
+  const handleLogout = () => {
+    logout()
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -45,6 +56,15 @@ const Layout = ({ children }) => {
                 </Link>
               )
             })}
+            {isAuthenticated() && (
+              <button
+                onClick={handleLogout}
+                className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 w-full"
+              >
+                <LogOut className="mr-3 h-5 w-5" />
+                Cerrar Sesión
+              </button>
+            )}
           </nav>
         </div>
       </div>
@@ -73,6 +93,15 @@ const Layout = ({ children }) => {
                 </Link>
               )
             })}
+            {isAuthenticated() && (
+              <button
+                onClick={handleLogout}
+                className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 w-full"
+              >
+                <LogOut className="mr-3 h-5 w-5" />
+                Cerrar Sesión
+              </button>
+            )}
           </nav>
         </div>
       </div>
@@ -92,13 +121,38 @@ const Layout = ({ children }) => {
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="flex flex-1" />
             <div className="flex items-center gap-x-4 lg:gap-x-6">
-              <Link
-                to="/login"
-                className="flex items-center gap-x-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                <LogIn className="h-5 w-5" />
-                Iniciar Sesión
-              </Link>
+              {isAuthenticated() ? (
+                <div className="flex items-center gap-x-4">
+                  <div className="flex items-center gap-x-2 text-sm text-gray-700">
+                    <User className="h-5 w-5" />
+                    <span>{user?.nombre || user?.correo}</span>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-x-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    Cerrar Sesión
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-x-4">
+                  <Link
+                    to="/login"
+                    className="flex items-center gap-x-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                  >
+                    <LogIn className="h-5 w-5" />
+                    Iniciar Sesión
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="flex items-center gap-x-2 text-sm font-medium text-primary-600 hover:text-primary-500"
+                  >
+                    <User className="h-5 w-5" />
+                    Registrarse
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>

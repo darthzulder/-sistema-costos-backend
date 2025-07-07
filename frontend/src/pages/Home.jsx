@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom'
 import { Calculator, Building2, Package, TrendingUp } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 
 const Home = () => {
+  const { user, isAuthenticated } = useAuth()
+
   const features = [
     {
       icon: Building2,
@@ -29,28 +32,56 @@ const Home = () => {
     <div className="space-y-12">
       {/* Hero Section */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-          Sistema de Gestión de{' '}
-          <span className="text-primary-600">Costos Empresariales</span>
-        </h1>
-        <p className="mt-6 text-lg leading-8 text-gray-600">
-          Optimiza tus procesos de producción y controla los costos de tu empresa
-          con nuestra plataforma integral de gestión.
-        </p>
-        <div className="mt-10 flex items-center justify-center gap-x-6">
-          <Link
-            to="/login"
-            className="btn-primary text-lg px-8 py-3"
-          >
-            Comenzar
-          </Link>
-          <Link
-            to="/dashboard"
-            className="btn-secondary text-lg px-8 py-3"
-          >
-            Ver Demo
-          </Link>
-        </div>
+        {isAuthenticated() ? (
+          <>
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+              ¡Bienvenido de vuelta,{' '}
+              <span className="text-primary-600">{user?.nombre || 'Usuario'}!</span>
+            </h1>
+            <p className="mt-6 text-lg leading-8 text-gray-600">
+              Continúa gestionando tus costos empresariales con nuestra plataforma integral.
+            </p>
+            <div className="mt-10 flex items-center justify-center gap-x-6">
+              <Link
+                to="/dashboard"
+                className="btn-primary text-lg px-8 py-3"
+              >
+                Ir al Dashboard
+              </Link>
+              <Link
+                to="/empresas"
+                className="btn-secondary text-lg px-8 py-3"
+              >
+                Gestionar Empresas
+              </Link>
+            </div>
+          </>
+        ) : (
+          <>
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+              Sistema de Gestión de{' '}
+              <span className="text-primary-600">Costos Empresariales</span>
+            </h1>
+            <p className="mt-6 text-lg leading-8 text-gray-600">
+              Optimiza tus procesos de producción y controla los costos de tu empresa
+              con nuestra plataforma integral de gestión.
+            </p>
+            <div className="mt-10 flex items-center justify-center gap-x-6">
+              <Link
+                to="/login"
+                className="btn-primary text-lg px-8 py-3"
+              >
+                Comenzar
+              </Link>
+              <Link
+                to="/register"
+                className="btn-secondary text-lg px-8 py-3"
+              >
+                Registrarse
+              </Link>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Features Section */}
@@ -86,21 +117,42 @@ const Home = () => {
       <div className="bg-primary-600">
         <div className="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              ¿Listo para optimizar tus costos?
-            </h2>
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-primary-200">
-              Únete a cientos de empresas que ya confían en nuestro sistema
-              para gestionar sus costos de producción.
-            </p>
-            <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Link
-                to="/login"
-                className="bg-white text-primary-600 hover:bg-gray-100 font-semibold px-8 py-3 rounded-lg transition-colors duration-200"
-              >
-                Registrarse
-              </Link>
-            </div>
+            {isAuthenticated() ? (
+              <>
+                <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                  ¿Listo para optimizar más costos?
+                </h2>
+                <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-primary-200">
+                  Explora todas las funcionalidades disponibles para maximizar la eficiencia de tu empresa.
+                </p>
+                <div className="mt-10 flex items-center justify-center gap-x-6">
+                  <Link
+                    to="/productos"
+                    className="bg-white text-primary-600 hover:bg-gray-100 font-semibold px-8 py-3 rounded-lg transition-colors duration-200"
+                  >
+                    Gestionar Productos
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                  ¿Listo para optimizar tus costos?
+                </h2>
+                <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-primary-200">
+                  Únete a cientos de empresas que ya confían en nuestro sistema
+                  para gestionar sus costos de producción.
+                </p>
+                <div className="mt-10 flex items-center justify-center gap-x-6">
+                  <Link
+                    to="/register"
+                    className="bg-white text-primary-600 hover:bg-gray-100 font-semibold px-8 py-3 rounded-lg transition-colors duration-200"
+                  >
+                    Registrarse
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
