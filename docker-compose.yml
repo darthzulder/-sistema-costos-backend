@@ -1,22 +1,6 @@
 version: '3.8'
 
 services:
-  # Base de datos PostgreSQL
-  postgres:
-    image: postgres:15-alpine
-    container_name: costos_postgres
-    environment:
-      POSTGRES_DB: costos_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres123
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - costos_network
-    restart: unless-stopped
-
   # Backend Node.js
   backend:
     build:
@@ -28,23 +12,14 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
-      - JWT_SECRET=tu_clave_secreta_super_segura_para_jwt
-      - SUPABASE_URL=https://vbhqfopxljjuxpsnlsuv.supabase.co
-      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZiaHFmb3B4bGpqdXhwc25sc3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzNDU3NDcsImV4cCI6MjA1NzkyMTc0N30.H-I-R_CmFi4Jaft-OTHjuKJ7Eu9DGUWy6h_wIBq4dV4
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=costos_db
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres123
     env_file:
       - ./backend/.env
-    volumes: []
-    depends_on:
-      - postgres
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
     networks:
       - costos_network
     restart: unless-stopped
-    command: npm run dev
 
   # Frontend React
   frontend:
@@ -82,9 +57,6 @@ services:
     networks:
       - costos_network
     restart: unless-stopped
-
-volumes:
-  postgres_data:
 
 networks:
   costos_network:

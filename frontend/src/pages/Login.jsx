@@ -2,12 +2,16 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Eye, EyeOff, LogIn } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import GoogleButton from '../components/GoogleButton'
+import GoogleOAuthStatus from '../components/GoogleOAuthStatus'
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [showOAuthStatus, setShowOAuthStatus] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -15,7 +19,7 @@ const Login = () => {
   
   const navigate = useNavigate()
   const location = useLocation()
-  const { login } = useAuth()
+  const { login, loginWithGoogle } = useAuth()
 
   // Mostrar mensaje de registro exitoso
   useEffect(() => {
@@ -43,6 +47,25 @@ const Login = () => {
       setError('Error en el inicio de sesión. Inténtalo de nuevo.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    setError('')
+    setGoogleLoading(true)
+
+    try {
+      const result = await loginWithGoogle()
+      
+      if (result.success) {
+        navigate('/dashboard')
+      } else {
+        setError(result.error)
+      }
+    } catch (error) {
+      setError('Error en la autenticación con Google. Inténtalo de nuevo.')
+    } finally {
+      setGoogleLoading(false)
     }
   }
 
@@ -77,7 +100,27 @@ const Login = () => {
           </div>
         )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        {/* Botón de Google */}
+        <div className="space-y-4">
+          <GoogleButton
+            onClick={handleGoogleLogin}
+            loading={googleLoading}
+            text="Iniciar sesión con Google"
+            disabled={loading}
+          />
+          
+          {/* Separador */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-gray-50 text-gray-500">O continúa con</span>
+            </div>
+          </div>
+        </div>
+
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -153,6 +196,22 @@ const Login = () => {
             </p>
           </div>
         </form>
+
+        {/* Estado de Google OAuth (opcional) */}
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => setShowOAuthStatus(!showOAuthStatus)}
+            className="text-xs text-gray-500 hover:text-gray-700 underline"
+          >
+            {showOAuthStatus ? 'Ocultar' : 'Mostrar'} estado de Google OAuth
+          </button>
+          {showOAuthStatus && (
+            <div className="mt-2">
+              <GoogleOAuthStatus />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

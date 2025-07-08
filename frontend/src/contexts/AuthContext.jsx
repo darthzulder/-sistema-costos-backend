@@ -67,6 +67,55 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const loginWithGoogle = async () => {
+    try {
+      // Abrir ventana popup para autenticación con Google
+      const popup = window.open(
+        'http://localhost:3000/auth/google',
+        'googleAuth',
+        'width=500,height=600,scrollbars=yes,resizable=yes'
+      )
+
+      return new Promise((resolve, reject) => {
+        const checkClosed = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkClosed)
+            reject(new Error('Autenticación cancelada'))
+          }
+        }, 1000)
+
+        // Escuchar mensajes del popup
+        const handleMessage = (event) => {
+          if (event.origin !== 'http://localhost:3000') return
+
+          if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
+            clearInterval(checkClosed)
+            popup.close()
+            window.removeEventListener('message', handleMessage)
+
+            const { token, usuario } = event.data
+            setUser(usuario)
+            setToken(token)
+            localStorage.setItem('token', token)
+            localStorage.setItem('user', JSON.stringify(usuario))
+
+            resolve({ success: true })
+          } else if (event.data.type === 'GOOGLE_AUTH_ERROR') {
+            clearInterval(checkClosed)
+            popup.close()
+            window.removeEventListener('message', handleMessage)
+            reject(new Error(event.data.error || 'Error en autenticación con Google'))
+          }
+        }
+
+        window.addEventListener('message', handleMessage)
+      })
+    } catch (error) {
+      console.error('Error en login con Google:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
   const register = async (userData) => {
     try {
       const response = await fetch('http://localhost:3000/auth/register', {
@@ -94,6 +143,11 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const registerWithGoogle = async () => {
+    // Para Google, el registro es el mismo que el login ya que Google maneja la verificación
+    return await loginWithGoogle()
+  }
+
   const logout = () => {
     setUser(null)
     setToken(null)
@@ -110,7 +164,9 @@ export const AuthProvider = ({ children }) => {
     token,
     loading,
     login,
+    loginWithGoogle,
     register,
+    registerWithGoogle,
     logout,
     isAuthenticated,
   }

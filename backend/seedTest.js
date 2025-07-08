@@ -23,8 +23,7 @@ async function seedData() {
 
     // Monedas
     await client.query(`INSERT INTO Moneda (Nom_Moneda, Simbolo) VALUES
-      ('Boliviano', 'Bs'),
-      ('Peso Argentino', '0Er1XY6mOT/',
+      ('Boliviano', 'Bs')`);
 
     // Usuarios
     await client.query(`INSERT INTO Usuario (Correo, Nombre, Clave, Celular, IDPais) VALUES

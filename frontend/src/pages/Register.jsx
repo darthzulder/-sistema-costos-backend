@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Eye, EyeOff, UserPlus, Mail, User, Lock } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import GoogleButton from '../components/GoogleButton'
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     name: '',
@@ -16,7 +18,7 @@ const Register = () => {
   })
   
   const navigate = useNavigate()
-  const { register } = useAuth()
+  const { register, registerWithGoogle } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -54,6 +56,25 @@ const Register = () => {
     }
   }
 
+  const handleGoogleRegister = async () => {
+    setError('')
+    setGoogleLoading(true)
+
+    try {
+      const result = await registerWithGoogle()
+      
+      if (result.success) {
+        navigate('/dashboard')
+      } else {
+        setError(result.error)
+      }
+    } catch (error) {
+      setError('Error en el registro con Google. Inténtalo de nuevo.')
+    } finally {
+      setGoogleLoading(false)
+    }
+  }
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -79,7 +100,27 @@ const Register = () => {
           </div>
         )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        {/* Botón de Google */}
+        <div className="space-y-4">
+          <GoogleButton
+            onClick={handleGoogleRegister}
+            loading={googleLoading}
+            text="Registrarse con Google"
+            disabled={loading}
+          />
+          
+          {/* Separador */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-gray-50 text-gray-500">O regístrate con</span>
+            </div>
+          </div>
+        </div>
+
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">

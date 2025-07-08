@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "nodemon --watch . --ext js,json --ignore node_modules --ignore *.log --ignore logs --ignore .git --ignore .env* --legacy-watch --delay 2000 server.js",
+    "dev:debug": "nodemon --inspect --watch . --ext js,json --ignore node_modules --ignore *.log --ignore logs --ignore .git --ignore .env* --legacy-watch --delay 2000 server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
