@@ -1,17 +1,6 @@
 require('dotenv').config({ path: '.env' });
 const pool = require('./db/pool');
 
-
-/*const { Pool } = require('pg');
-// CONFIGURA TU CONEXIÓN
-const pool = new Pool({
-  user: 'postgres',
-  host: 'https://vbhqfopxljjuxpsnlsuv.supabase.co',
-  database: 'postgres',
-  password: '0Er1XY6mOT/',
-  port: 5432, // Cambia si es necesario
-});*/
-
 async function verifyConfiguration() {
   console.log('🔍 Verificación completa de la configuración del backend...\n');
 

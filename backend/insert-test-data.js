@@ -1,16 +1,13 @@
-//require('dotenv').config();
-//const pool = require('./db/pool');
+require('dotenv').config();
 const { Pool } = require('pg');
 
 const pool = new Pool({
-  user: 'postgres.vbhqfopxljjuxpsnlsuv',
-  host: 'aws-0-sa-east-1.pooler.supabase.com',
-  database: 'postgres',
-  password: '0Er1XY6mOT/',
-  port: 6543,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  user: process.env.DB_USER || 'postgres',
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME || 'postgres',
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT || 5432,
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
 
 async function insertarDatosDePrueba() {

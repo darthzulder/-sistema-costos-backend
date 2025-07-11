@@ -69,9 +69,8 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithGoogle = async () => {
     try {
-      // Abrir ventana popup para autenticación con Google
       const popup = window.open(
-        'http://localhost:3000/auth/google',
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/auth/google`,
         'googleAuth',
         'width=500,height=600,scrollbars=yes,resizable=yes'
       )
@@ -83,32 +82,7 @@ export const AuthProvider = ({ children }) => {
       return new Promise((resolve, reject) => {
         let isResolved = false
         
-        // Remover la verificación automática del popup cerrado
-        // ya que puede causar falsos positivos
-        /*
-        const checkClosed = setInterval(() => {
-          try {
-            console.log('Verificando popup.closed:', popup.closed, 'isResolved:', isResolved)
-            if (popup.closed && !isResolved) {
-              console.log('Popup cerrado, cancelando autenticación')
-              clearInterval(checkClosed)
-              window.removeEventListener('message', handleMessage)
-              reject(new Error('Autenticación cancelada'))
-            }
-          } catch (error) {
-            console.log('Error al verificar estado del popup:', error)
-            if (!isResolved) {
-              clearInterval(checkClosed)
-              window.removeEventListener('message', handleMessage)
-              reject(new Error('Error al verificar el estado de la ventana de autenticación'))
-            }
-          }
-        }, 2000)
-        */
-
-        // Escuchar mensajes del popup
         const handleMessage = (event) => {
-          // Verificar que sea un mensaje de autenticación de Google
           if (!event.data || event.data.type !== 'GOOGLE_AUTH_SUCCESS') {
             return
           }
@@ -135,10 +109,8 @@ export const AuthProvider = ({ children }) => {
           }
         }
 
-        // Escuchar mensajes postMessage
         window.addEventListener('message', handleMessage)
         
-        // Verificar cookies periódicamente
         const checkCookies = () => {
           const cookies = document.cookie.split(';');
           let result = null;
@@ -167,7 +139,6 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('token', token)
                 localStorage.setItem('user', JSON.stringify(usuario))
                 
-                // Limpiar el resultado de Google Auth
                 document.cookie = 'googleAuthResult=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
                 
                 resolve({ success: true })
@@ -178,10 +149,8 @@ export const AuthProvider = ({ children }) => {
           }
         }
         
-        // Verificar cookies cada 500ms
         const storageCheckInterval = setInterval(checkCookies, 500)
         
-        // Timeout de seguridad después de 2 minutos
         setTimeout(() => {
           if (!isResolved) {
             isResolved = true

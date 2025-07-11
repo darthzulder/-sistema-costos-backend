@@ -8,10 +8,10 @@ services:
       dockerfile: ../docker/backend.Dockerfile
     container_name: costos_backend
     ports:
-      - "3000:3000"
+      - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
     environment:
-      - NODE_ENV=development
-      - PORT=3000
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=${BACKEND_PORT:-3000}
     env_file:
       - ./backend/.env
     volumes:
@@ -28,9 +28,9 @@ services:
       dockerfile: ../docker/frontend.Dockerfile
     container_name: costos_frontend
     ports:
-      - "3001:3001"
+      - "${FRONTEND_PORT:-3001}:${FRONTEND_PORT:-3001}"
     environment:
-      - VITE_API_URL=http://localhost:3000
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:3000}
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -46,8 +46,8 @@ services:
     image: nginx:alpine
     container_name: costos_nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
     volumes:
       - ./docker/nginx.conf:/etc/nginx/nginx.conf
       - ./docker/ssl:/etc/nginx/ssl

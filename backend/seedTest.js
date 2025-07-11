@@ -1,13 +1,15 @@
 // seedTest.js
+require('dotenv').config();
 const { Pool } = require('pg');
 
-// CONFIGURA TU CONEXIÓN
+// CONFIGURACIÓN DESDE VARIABLES DE ENTORNO
 const pool = new Pool({
-  user: 'postgres',
-  host: 'https://vbhqfopxljjuxpsnlsuv.supabase.co',
-  database: 'postgres',
-  password: '0Er1XY6mOT/',
-  port: 5432, // Cambia si es necesario
+  user: process.env.DB_USER || 'postgres',
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME || 'postgres',
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT || 5432,
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
 
 async function seedData() {

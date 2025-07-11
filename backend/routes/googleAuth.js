@@ -80,32 +80,36 @@ router.get('/google/callback',
             <h2>Autenticación Exitosa</h2>
             <p>Cerrando ventana...</p>
           </div>
-                  <script>
-          // Función para enviar mensaje y cerrar ventana
-          function sendMessageAndClose() {
-            const message = {
-              type: 'GOOGLE_AUTH_SUCCESS',
-              token: '${token}',
-              usuario: {
-                id: ${usuario.idusuario},
-                correo: '${usuario.correo}',
-                nombre: '${usuario.nombre}'
+          <script>
+            function sendMessageAndClose() {
+              const message = {
+                type: 'GOOGLE_AUTH_SUCCESS',
+                token: '${token}',
+                usuario: {
+                  id: ${usuario.idusuario},
+                  correo: '${usuario.correo}',
+                  nombre: '${usuario.nombre}'
+                }
+              };
+              
+              if (window.opener) {
+                try {
+                  window.opener.postMessage(message, 'http://localhost:3001');
+                } catch (error) {
+                  console.error('Error enviando mensaje:', error);
+                }
               }
-            };
+              
+              const messageString = JSON.stringify(message);
+              document.cookie = 'googleAuthResult=' + encodeURIComponent(messageString) + '; path=/; max-age=60';
+              
+              setTimeout(() => {
+                window.close();
+              }, 1000);
+            }
             
-            // Guardar el mensaje en una cookie (se comparte entre ventanas)
-            const messageString = JSON.stringify(message);
-            document.cookie = 'googleAuthResult=' + encodeURIComponent(messageString) + '; path=/; max-age=60';
-            
-            // Cerrar ventana después de enviar el mensaje
-            setTimeout(() => {
-              window.close();
-            }, 1000);
-          }
-          
-          // Ejecutar inmediatamente
-          sendMessageAndClose();
-        </script>
+            sendMessageAndClose();
+          </script>
         </body>
       </html>
     `;

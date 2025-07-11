@@ -7,7 +7,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback"
+      callbackURL: `${process.env.BACKEND_URL || 'http://localhost:3000'}/auth/google/callback`
     },
     async (accessToken, refreshToken, profile, done) => {
       const correo = profile.emails[0].value;
@@ -44,6 +44,14 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (id, done) => {
-  const res = await pool.query('SELECT * FROM Usuario WHERE IDUsuario = $1', [id]);
-  done(null, res.rows[0]);
+  try {
+    const res = await pool.query('SELECT * FROM Usuario WHERE IDUsuario = $1', [id]);
+    if (res.rows.length === 0) {
+      return done(null, false);
+    }
+    done(null, res.rows[0]);
+  } catch (error) {
+    console.error('Error en deserializeUser:', error);
+    done(error, null);
+  }
 });

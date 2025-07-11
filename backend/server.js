@@ -17,7 +17,12 @@ const app = express();
 
 // 1. Middlewares base
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:5173', 
+    process.env.BACKEND_URL || 'http://localhost:3000',
+    'http://localhost:3001', // Frontend corriendo en puerto 3001
+    'http://localhost:5173'  // Frontend corriendo en puerto 5173 (fallback)
+  ],
   credentials: true
 }));
 
@@ -41,13 +46,13 @@ app.use(morgan('dev'));
 
 // 2. Sesión y Passport
 app.use(session({
-  secret: 'claveparasesion',
+  secret: process.env.SESSION_SECRET || 'claveparasesion',
   resave: false,
   saveUninitialized: false,
   cookie: {
     maxAge: 24 * 60 * 60 * 1000, // 1 día
     sameSite: 'lax',
-    secure: false, // true solo si usas https
+    secure: process.env.NODE_ENV === 'production', // true solo si usas https
     httpOnly: true
   }
 }));
@@ -70,7 +75,7 @@ app.get('/', (req, res) => {
 
 // Ruta de fallback para redirigir al frontend
 app.get('/dashboard', (req, res) => {
-  res.redirect('http://localhost:5173/dashboard');
+  res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard`);
 });
 
 // Puerto
