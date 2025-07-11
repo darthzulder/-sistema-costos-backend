@@ -63,7 +63,7 @@ const Login = () => {
         setError(result.error)
       }
     } catch (error) {
-      setError('Error en la autenticación con Google. Inténtalo de nuevo.')
+      setError(error.message || 'Error en la autenticación con Google. Inténtalo de nuevo.')
     } finally {
       setGoogleLoading(false)
     }

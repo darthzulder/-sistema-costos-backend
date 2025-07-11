@@ -16,8 +16,26 @@ const empresaRoutes = require('./routes/empresa');
 const app = express();
 
 // 1. Middlewares base
-app.use(cors());
-app.use(helmet());
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true
+}));
+
+// Configurar helmet para permitir popups y scripts inline
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://accounts.google.com"],
+      frameSrc: ["'self'", "https://accounts.google.com"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
+
 app.use(express.json());
 app.use(morgan('dev'));
 
@@ -27,7 +45,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 24 * 60 * 60 * 1000 // 1 día
+    maxAge: 24 * 60 * 60 * 1000, // 1 día
+    sameSite: 'lax',
+    secure: false, // true solo si usas https
+    httpOnly: true
   }
 }));
 
@@ -45,6 +66,11 @@ app.use('/empresas', empresaRoutes);
 // Rutas base
 app.get('/', (req, res) => {
   res.send('🚀 Backend funcionando correctamente.');
+});
+
+// Ruta de fallback para redirigir al frontend
+app.get('/dashboard', (req, res) => {
+  res.redirect('http://localhost:5173/dashboard');
 });
 
 // Puerto

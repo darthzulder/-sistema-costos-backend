@@ -40,6 +40,7 @@ router.get('/google/callback',
       <html>
         <head>
           <title>Autenticación Google</title>
+          <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
           <style>
             body {
               font-family: Arial, sans-serif;
@@ -79,28 +80,32 @@ router.get('/google/callback',
             <h2>Autenticación Exitosa</h2>
             <p>Cerrando ventana...</p>
           </div>
-          <script>
-            // Enviar datos al popup padre
-            if (window.opener) {
-              window.opener.postMessage({
-                type: 'GOOGLE_AUTH_SUCCESS',
-                token: '${token}',
-                usuario: ${JSON.stringify({
-                  id: usuario.idusuario,
-                  correo: usuario.correo,
-                  nombre: usuario.nombre
-                })}
-              }, 'http://localhost:5173');
-              
-              // Cerrar popup después de un breve delay
-              setTimeout(() => {
-                window.close();
-              }, 1000);
-            } else {
-              // Si no hay popup padre, redirigir
-              window.location.href = 'http://localhost:5173/dashboard';
-            }
-          </script>
+                  <script>
+          // Función para enviar mensaje y cerrar ventana
+          function sendMessageAndClose() {
+            const message = {
+              type: 'GOOGLE_AUTH_SUCCESS',
+              token: '${token}',
+              usuario: {
+                id: ${usuario.idusuario},
+                correo: '${usuario.correo}',
+                nombre: '${usuario.nombre}'
+              }
+            };
+            
+            // Guardar el mensaje en una cookie (se comparte entre ventanas)
+            const messageString = JSON.stringify(message);
+            document.cookie = 'googleAuthResult=' + encodeURIComponent(messageString) + '; path=/; max-age=60';
+            
+            // Cerrar ventana después de enviar el mensaje
+            setTimeout(() => {
+              window.close();
+            }, 1000);
+          }
+          
+          // Ejecutar inmediatamente
+          sendMessageAndClose();
+        </script>
         </body>
       </html>
     `;
@@ -116,6 +121,7 @@ router.get('/google/error', (req, res) => {
     <html>
       <head>
         <title>Error de Autenticación</title>
+        <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
         <style>
           body {
             font-family: Arial, sans-serif;

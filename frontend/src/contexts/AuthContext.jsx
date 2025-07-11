@@ -76,22 +76,48 @@ export const AuthProvider = ({ children }) => {
         'width=500,height=600,scrollbars=yes,resizable=yes'
       )
 
+      if (!popup) {
+        throw new Error('No se pudo abrir la ventana de autenticación. Verifica que el bloqueador de popups esté deshabilitado.')
+      }
+
       return new Promise((resolve, reject) => {
+        let isResolved = false
+        
+        // Remover la verificación automática del popup cerrado
+        // ya que puede causar falsos positivos
+        /*
         const checkClosed = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(checkClosed)
-            reject(new Error('Autenticación cancelada'))
+          try {
+            console.log('Verificando popup.closed:', popup.closed, 'isResolved:', isResolved)
+            if (popup.closed && !isResolved) {
+              console.log('Popup cerrado, cancelando autenticación')
+              clearInterval(checkClosed)
+              window.removeEventListener('message', handleMessage)
+              reject(new Error('Autenticación cancelada'))
+            }
+          } catch (error) {
+            console.log('Error al verificar estado del popup:', error)
+            if (!isResolved) {
+              clearInterval(checkClosed)
+              window.removeEventListener('message', handleMessage)
+              reject(new Error('Error al verificar el estado de la ventana de autenticación'))
+            }
           }
-        }, 1000)
+        }, 2000)
+        */
 
         // Escuchar mensajes del popup
         const handleMessage = (event) => {
-          if (event.origin !== 'http://localhost:3000') return
+          // Verificar que sea un mensaje de autenticación de Google
+          if (!event.data || event.data.type !== 'GOOGLE_AUTH_SUCCESS') {
+            return
+          }
 
           if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
-            clearInterval(checkClosed)
+            isResolved = true
             popup.close()
             window.removeEventListener('message', handleMessage)
+            clearInterval(storageCheckInterval)
 
             const { token, usuario } = event.data
             setUser(usuario)
@@ -101,17 +127,72 @@ export const AuthProvider = ({ children }) => {
 
             resolve({ success: true })
           } else if (event.data.type === 'GOOGLE_AUTH_ERROR') {
-            clearInterval(checkClosed)
+            isResolved = true
             popup.close()
             window.removeEventListener('message', handleMessage)
+            clearInterval(storageCheckInterval)
             reject(new Error(event.data.error || 'Error en autenticación con Google'))
           }
         }
 
+        // Escuchar mensajes postMessage
         window.addEventListener('message', handleMessage)
+        
+        // Verificar cookies periódicamente
+        const checkCookies = () => {
+          const cookies = document.cookie.split(';');
+          let result = null;
+          
+          for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'googleAuthResult') {
+              result = decodeURIComponent(value);
+              break;
+            }
+          }
+          
+          if (result) {
+            try {
+              const data = JSON.parse(result)
+              
+              if (data.type === 'GOOGLE_AUTH_SUCCESS') {
+                isResolved = true
+                popup.close()
+                window.removeEventListener('message', handleMessage)
+                clearInterval(storageCheckInterval)
+                
+                const { token, usuario } = data
+                setUser(usuario)
+                setToken(token)
+                localStorage.setItem('token', token)
+                localStorage.setItem('user', JSON.stringify(usuario))
+                
+                // Limpiar el resultado de Google Auth
+                document.cookie = 'googleAuthResult=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                
+                resolve({ success: true })
+              }
+            } catch (error) {
+              console.error('Error al procesar datos de cookies:', error)
+            }
+          }
+        }
+        
+        // Verificar cookies cada 500ms
+        const storageCheckInterval = setInterval(checkCookies, 500)
+        
+        // Timeout de seguridad después de 2 minutos
+        setTimeout(() => {
+          if (!isResolved) {
+            isResolved = true
+            popup.close()
+            window.removeEventListener('message', handleMessage)
+            clearInterval(storageCheckInterval)
+            reject(new Error('Timeout: La autenticación tardó demasiado'))
+          }
+        }, 120000)
       })
     } catch (error) {
-      console.error('Error en login con Google:', error)
       return { success: false, error: error.message }
     }
   }
